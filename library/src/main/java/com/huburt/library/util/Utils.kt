@@ -16,6 +16,7 @@ import android.view.WindowManager
 object Utils {
 
     /** 获得状态栏的高度  */
+    @JvmStatic
     fun getStatusHeight(context: Context): Int {
         var statusHeight = -1
         try {
@@ -31,6 +32,7 @@ object Utils {
     }
 
     /** 根据屏幕宽度与密度计算GridView显示的列数， 最少为三列，并获取Item宽度  */
+    @JvmStatic
     fun getImageItemWidth(activity: Activity): Int {
         val screenWidth = activity.resources.displayMetrics.widthPixels
         val densityDpi = activity.resources.displayMetrics.densityDpi
@@ -43,6 +45,7 @@ object Utils {
     /**
      * 判断SDCard是否可用
      */
+    @JvmStatic
     fun existSDCard(): Boolean {
         return Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED
     }
@@ -50,6 +53,7 @@ object Utils {
     /**
      * 获取手机大小（分辨率）
      */
+    @JvmStatic
     fun getScreenPix(activity: Activity): DisplayMetrics {
         val displaysMetrics = DisplayMetrics()
         activity.windowManager.defaultDisplay.getMetrics(displaysMetrics)
@@ -57,6 +61,7 @@ object Utils {
     }
 
     /** dp转px  */
+    @JvmStatic
     fun dp2px(context: Context, dpVal: Float): Int {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpVal, context.resources.displayMetrics).toInt()
     }
@@ -64,6 +69,7 @@ object Utils {
     /**
      * 判断手机是否含有虚拟按键  99%
      */
+    @JvmStatic
     fun hasVirtualNavigationBar(context: Context): Boolean {
         var hasSoftwareKeys = true
 
@@ -95,6 +101,7 @@ object Utils {
     /**
      * 获取导航栏高度，有些没有虚拟导航栏的手机也能获取到，建议先判断是否有虚拟按键
      */
+    @JvmStatic
     fun getNavigationBarHeight(context: Context): Int {
         val resourceId = context.resources.getIdentifier("navigation_bar_height", "dimen", "android")
         return if (resourceId > 0) context.resources.getDimensionPixelSize(resourceId) else 0

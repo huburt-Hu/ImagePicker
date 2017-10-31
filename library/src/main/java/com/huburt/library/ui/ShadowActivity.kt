@@ -15,7 +15,7 @@ import com.huburt.library.bean.ImageItem
  */
 class ShadowActivity : BaseActivity() {
 
-    private var type: Int = 0
+    private var type: Int = 0//0pick 1review 2camera
     private var position: Int = 0
 
     companion object {
@@ -35,18 +35,29 @@ class ShadowActivity : BaseActivity() {
     }
 
     private fun startPick() {
-        if (type == 1) {
-            ImagePreviewDelActivity.startForResult(this, 102, position)
-        } else {
-            ImageGridActivity.startForResult(this, 101)
+        when (type) {
+            0 -> ImageGridActivity.startForResult(this, 101, false)
+            1 -> ImagePreviewDelActivity.startForResult(this, 102, position)
+            2 -> ImageGridActivity.startForResult(this, 101, true)
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        val historyImages = ImagePicker.pickHelper.historyImages
         if (resultCode == Activity.RESULT_OK && data != null) {
             val images = data.extras[C.EXTRA_IMAGE_ITEMS] as ArrayList<ImageItem>
+            historyImages.let {
+                it.clear()
+                it.addAll(images)
+            }
             ImagePicker.listener?.onImageResult(images)
+        } else if (resultCode == Activity.RESULT_CANCELED) {
+            ImagePicker.pickHelper.selectedImages.let {
+                it.clear()
+                it.addAll(historyImages)
+            }
+            ImagePicker.listener?.onImageResult(historyImages)
         }
         ImagePicker.listener = null
         finish()

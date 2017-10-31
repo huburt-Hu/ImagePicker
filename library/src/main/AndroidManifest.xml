@@ -28,6 +28,10 @@
             android:name=".ui.ImagePreviewDelActivity"
             android:theme="@style/ImagePickerTheme" />
 
+        <activity
+            android:name=".ui.ImageCropActivity"
+            android:theme="@style/ImagePickerTheme" />
+
         <provider
             android:name=".ImagePickerProvider"
             android:authorities="${applicationId}.provider"

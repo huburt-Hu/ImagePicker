@@ -8,6 +8,7 @@ import com.huburt.library.ImagePicker
 import com.huburt.library.bean.ImageItem
 import com.huburt.library.util.Utils
 import com.huburt.library.view.GridSpacingItemDecoration
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), ImagePicker.OnPickImageResultListener {
     private lateinit var recyclerView: RecyclerView
@@ -15,11 +16,21 @@ class MainActivity : AppCompatActivity(), ImagePicker.OnPickImageResultListener 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        ImagePicker.prepare().limit(8)//初始化选择图片参数，会一直保留直到下次调用prepare或resetConfig方法
-        findViewById(R.id.tv).setOnClickListener({
+        //初始化选择图片参数，会一直保留直到下次调用prepare或resetConfig方法
+        ImagePicker.prepare().limit(8)
+        //默认不裁剪
+        cb_crop.setOnCheckedChangeListener({ _, isChecked -> ImagePicker.isCrop(isChecked) })
+        cb_multi.isChecked = true//默认是多选
+        cb_multi.setOnCheckedChangeListener { _, isChecked -> ImagePicker.multiMode(isChecked) }
+
+        btn_pick.setOnClickListener {
             //选择图片，第二次进入会自动带入之前选择的图片（未重置图片参数）
             ImagePicker.pick(this@MainActivity, this@MainActivity)
-        })
+        }
+        btn_camera.setOnClickListener {
+            //打开相机
+            ImagePicker.camera(this@MainActivity, this@MainActivity)
+        }
 
         recyclerView = findViewById(R.id.recycler_view) as RecyclerView
         recyclerView.layoutManager = GridLayoutManager(this, 3)
@@ -36,6 +47,11 @@ class MainActivity : AppCompatActivity(), ImagePicker.OnPickImageResultListener 
 
     override fun onImageResult(imageItems: ArrayList<ImageItem>) {
         (recyclerView.adapter as ImageAdapter).updateData(imageItems)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        ImagePicker.clear()
     }
 
 }

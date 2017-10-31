@@ -4,6 +4,7 @@ import android.app.Activity
 import android.support.v7.widget.AppCompatCheckBox
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.RecyclerView.ViewHolder
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -96,7 +97,7 @@ class ImageRecyclerAdapter(
             //根据是否多选，显示或隐藏checkbox
             if (pickHelper.isMultiMode) {
                 cbCheck.visibility = View.VISIBLE
-                if (pickHelper.selectedImages.contains(imageItem)) {
+                if (contains(pickHelper.selectedImages, imageItem)) {
                     mask.visibility = View.VISIBLE
                     cbCheck.isChecked = true
                 } else {
@@ -107,8 +108,19 @@ class ImageRecyclerAdapter(
                 cbCheck.visibility = View.GONE
             }
             if (imageItem?.path != null) {
-                ImagePicker.imageLoader?.displayImage(mActivity, imageItem.path!!, ivThumb, mImageSize, mImageSize) //显示图片
+                ImagePicker.imageLoader.displayImage(mActivity, imageItem.path!!, ivThumb, mImageSize, mImageSize) //显示图片
             }
+        }
+
+        private fun contains(selectedImages: ArrayList<ImageItem>, imageItem: ImageItem?): Boolean {
+//            for (item in selectedImages) {
+//                if (TextUtils.equals(item.path, imageItem.path)) {
+//                    return true
+//                }
+//            }
+//            return false
+            //等同于上方
+            return selectedImages.any { TextUtils.equals(it.path, imageItem?.path) }
         }
     }
 
