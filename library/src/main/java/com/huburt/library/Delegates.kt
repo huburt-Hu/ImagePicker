@@ -8,10 +8,10 @@ import kotlin.reflect.KProperty
  *
  * Created on 2017/10/31.
  */
-internal class InitializationCheck<T> : ReadWriteProperty<Any?, T> {
+internal class InitializationCheck<T>(private val message: String? = null) : ReadWriteProperty<Any?, T> {
     private var value: T? = null
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        return value ?: throw IllegalStateException("not initialized")
+        return value ?: throw IllegalStateException(message ?: "not initialized")
     }
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {

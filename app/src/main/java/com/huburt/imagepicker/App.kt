@@ -13,5 +13,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         ImagePicker.init(GlideImageLoader())
+        //保存为自定义默认
+        ImagePicker.limit(12).isCrop(true).saveAsDefault()
     }
 }

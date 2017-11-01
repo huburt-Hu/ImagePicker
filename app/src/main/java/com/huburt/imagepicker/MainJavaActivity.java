@@ -35,9 +35,10 @@ public class MainJavaActivity extends AppCompatActivity implements ImagePicker.O
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //初始化选择图片参数，会一直保留直到下次调用prepare或resetConfig方法
-        ImagePicker.prepare().limit(8);
-
+        //使用自定义默认参数或者默认参数
+        ImagePicker.defaultConfig();
+        //临时改变选择图片参数
+//        ImagePicker.limit(12);
         //默认不裁剪
         CheckBox cb_crop = (CheckBox) findViewById(R.id.cb_crop);
         cb_crop.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -54,7 +55,6 @@ public class MainJavaActivity extends AppCompatActivity implements ImagePicker.O
                 ImagePicker.multiMode(isChecked);
             }
         });
-
         Button btn_pick = (Button) findViewById(R.id.btn_pick);
         btn_pick.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,12 +63,11 @@ public class MainJavaActivity extends AppCompatActivity implements ImagePicker.O
                 ImagePicker.pick(MainJavaActivity.this, MainJavaActivity.this);
             }
         });
-
         Button btn_camera = (Button) findViewById(R.id.btn_camera);
         btn_camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //打开相机
+                //直接打开相机
                 ImagePicker.camera(MainJavaActivity.this, MainJavaActivity.this);
             }
         });
@@ -94,6 +93,6 @@ public class MainJavaActivity extends AppCompatActivity implements ImagePicker.O
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        ImagePicker.clear();
+        ImagePicker.clear();//清除缓存已选择的图片
     }
 }

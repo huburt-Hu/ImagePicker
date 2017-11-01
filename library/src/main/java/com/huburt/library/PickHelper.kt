@@ -10,11 +10,12 @@ import java.util.*
  *
  * Created on 2017/10/13.
  */
-class PickHelper : Serializable {
-    var limit: Int = 9 //选择照片限制
-    var isCrop: Boolean = false //是否裁剪
-    var isShowCamera: Boolean = true //是否显示拍照按钮
-    var isMultiMode: Boolean = true //选择模式
+data class PickHelper(
+        var limit: Int = 9, //选择照片限制
+        var isCrop: Boolean = false, //是否裁剪
+        var isShowCamera: Boolean = true, //是否显示拍照按钮
+        var isMultiMode: Boolean = true //选择模式
+) : Serializable {
 
     var focusStyle = CropImageView.Style.RECTANGLE //裁剪框的形状
     var outPutX = 800           //裁剪保存宽度
@@ -27,13 +28,5 @@ class PickHelper : Serializable {
     val historyImages: ArrayList<ImageItem> = ArrayList()//进入时已选中的的图片数据
 
     fun canSelect(): Boolean = selectedImages.size < limit
-
-    override fun toString(): String {
-        return "PickHelper(" +
-                "limit=$limit, " +
-                "isShowCamera=$isShowCamera, " +
-                "isMultiMode=$isMultiMode, " +
-                "selectedImages=$selectedImages)"
-    }
 
 }

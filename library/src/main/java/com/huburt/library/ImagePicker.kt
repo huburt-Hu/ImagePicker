@@ -1,9 +1,11 @@
 package com.huburt.library
 
 import android.content.Context
+import com.huburt.library.ImagePicker.pickHelper
 import com.huburt.library.bean.ImageItem
 import com.huburt.library.loader.ImageLoader
 import com.huburt.library.ui.ShadowActivity
+import com.huburt.library.view.CropImageView
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -17,9 +19,11 @@ object ImagePicker {
         println("imagePicker init ...")
     }
 
-    internal var imageLoader: ImageLoader by InitializationCheck()
+    internal var imageLoader: ImageLoader by InitializationCheck("imageLoader is not initialized, please call 'ImagePicker.init(XX)' in your application's onCreate")
 
     internal var pickHelper: PickHelper = PickHelper()
+
+    private var customPickHelper: PickHelper? = null
 
     internal var listener: ImagePicker.OnPickImageResultListener? = null
 
@@ -32,20 +36,30 @@ object ImagePicker {
     }
 
     /**
-     * 准备图片选择，初始化参数配置
+     * 图片选择参数恢复默认，如有自定义默认（saveAsDefault方法保存）优先回复自定义默认
      */
     @JvmStatic
-    fun prepare(): ImagePicker {
-        pickHelper = PickHelper()
+    fun defaultConfig(): ImagePicker {
+        pickHelper = customPickHelper?.copy() ?: PickHelper()
         return this
     }
 
     /**
-     * 重置默认图片选择参数，及图片选择记录
+     * 当编辑过参数保存为自定义默认
+     */
+    @JvmStatic
+    fun saveAsDefault(): ImagePicker {
+        customPickHelper = pickHelper
+        return this
+    }
+
+    /**
+     * 清楚缓存的已选择图片
      */
     @JvmStatic
     fun clear() {
-        pickHelper = PickHelper()
+        pickHelper.selectedImages.clear()
+        pickHelper.historyImages.clear()
     }
 
     /**
@@ -84,6 +98,24 @@ object ImagePicker {
         return this
     }
 
+    /**
+     * @param focusStyle 裁剪框的形状
+     * @param focusWidth 焦点框的宽度
+     * @param focusHeight 焦点框的高度
+     * @param outPutX 裁剪保存宽度
+     * @param outPutY 裁剪保存高度
+     * @param isSaveRectangle 裁剪后的图片是否是矩形，否者跟随裁剪框的形状
+     */
+    @JvmStatic
+    fun CropConfig(focusStyle: CropImageView.Style, focusWidth: Int, focusHeight: Int, outPutX: Int, outPutY: Int, isSaveRectangle: Boolean) {
+        pickHelper.focusStyle = focusStyle
+        pickHelper.focusWidth = focusWidth
+        pickHelper.focusHeight = focusHeight
+        pickHelper.outPutX = outPutX
+        pickHelper.outPutY = outPutY
+        pickHelper.isSaveRectangle = isSaveRectangle
+    }
+
     @JvmStatic
     fun pick(context: Context, listener: OnPickImageResultListener) {
         this.listener = listener
@@ -104,6 +136,5 @@ object ImagePicker {
 
     interface OnPickImageResultListener {
         fun onImageResult(imageItems: ArrayList<ImageItem>)
-
     }
 }
