@@ -11,7 +11,6 @@
 ## 效果
 
 ![sample1](https://github.com/huburt-Hu/ImagePicker/raw/master/screen/device-2017-11-01-111126.png)
-![sample2](https://github.com/huburt-Hu/ImagePicker/raw/master/screen/device-2017-10-16-095841.png)
 ![sample3](https://github.com/huburt-Hu/ImagePicker/raw/master/screen/device-2017-11-01-111209.png)
 
 
@@ -28,7 +27,7 @@
 ```
 
 ## 集成
-> 项目build.gradle添加
+### 项目build.gradle添加
 
 ```
 allprojects {
@@ -37,7 +36,7 @@ allprojects {
     }
 }
 ```
-> module的build.gradle添加
+### module的build.gradle添加
 
 ```
 dependencies {
@@ -53,7 +52,7 @@ dependencies {
     }
 }
 ```
-> 根据自己的图片框架实现 com.huburt.library.loader.ImageLoader 接口
+### 根据自己的图片框架实现 com.huburt.library.loader.ImageLoader 接口
 
 下面是Glide实现的示例
 
@@ -87,7 +86,7 @@ class GlideImageLoader : ImageLoader {
     }
 }
 ```
-> 在Application的onCreate中初始化
+### 在Application的onCreate中初始化
 
 ```
 		//初始化图片加载器
@@ -101,9 +100,9 @@ class GlideImageLoader : ImageLoader {
                 .saveAsDefault()//保存为自定义
 ```
 
-> 使用
+### 使用
 
-1.选择配置，可以省略，使用临时配置（如有）或者默认
+* 选择配置，可以省略，使用临时配置（如有）或者默认
 
 ```
 		//使用自定义默认参数或者默认参数
@@ -112,7 +111,7 @@ class GlideImageLoader : ImageLoader {
 //        ImagePicker.limit(12);
 ```
 
-2.调用选择图片
+* 调用选择图片
 
 Kotlin调用
 
@@ -134,12 +133,12 @@ ImagePicker.pick(MainJavaActivity.this, new ImagePicker.OnPickImageResultListene
                     }
                 });
 ```
-3.直接打开相机，一次只能获取1张图片
+* 直接打开相机，一次只能获取1张图片
 
 ```
 ImagePicker.camera(context,listener）//参数同pick
 ```
-4.回顾已选择图片，可以删除，listener返回删除后的集合
+* 回顾已选择图片，可以删除，listener返回删除后的集合
 
 ```
 ImagePicker.review(context,position,listener)
@@ -156,6 +155,12 @@ ImagePicker.review(context,position,listener)
 | width    | 图片的宽度 |
 | height    | 图片的高度 |
 | mimeType   | 图片的类型 |
+
+
+## 最后
+
+这个库会持续维护下去，并且根据微信的更新，添加新功能，目前已计划增加网格视图滚动显示图片时间，预览界面显示所用选择图片。
+如果你在使用的过程中，发现bug或者更好的建议，可以给我留言。更欢迎技术交流~
 
 
 ## License
