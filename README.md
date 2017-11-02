@@ -8,10 +8,24 @@
 首先感谢一下原作者：
 [https://github.com/jeasonlzy/ImagePicker](https://github.com/jeasonlzy/ImagePicker)
 
+## 更新日志
+
+**v1.1**
+
+为了向微信原版靠拢，新增了如下功能
+
+1. 网格视图界面增加滑动显示图片时间
+2. 预览界面增加已选图片的缩略图
+
+**v1.0**
+
+复刻原库的功能，修复`android.os.TransactionTooLargeException`的bug
+
+
 ## 效果
 
-![sample1](https://github.com/huburt-Hu/ImagePicker/raw/master/screen/device-2017-11-01-111126.png)
-![sample3](https://github.com/huburt-Hu/ImagePicker/raw/master/screen/device-2017-11-01-111209.png)
+![ImageGridActivity](https://github.com/huburt-Hu/ImagePicker/raw/master/screen/show_time.png)
+![ImagePreviewActivity](https://github.com/huburt-Hu/ImagePicker/raw/master/screen/small_preview.png)
 
 
 ## 原理细节

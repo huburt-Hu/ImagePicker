@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.AdapterView
 import android.widget.Button
 import android.widget.TextView
@@ -23,11 +24,13 @@ import com.huburt.library.bean.ImageFolder
 import com.huburt.library.bean.ImageItem
 import com.huburt.library.util.CameraUtil
 import com.huburt.library.util.Utils
+import com.huburt.library.util.isSameDate
 import com.huburt.library.view.FolderPopUpWindow
 import com.huburt.library.view.GridSpacingItemDecoration
 import kotlinx.android.synthetic.main.activity_image_grid.*
 import kotlinx.android.synthetic.main.include_top_bar.*
 import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -67,7 +70,7 @@ class ImageGridActivity : BaseActivity(), View.OnClickListener, ImageDataSource.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_image_grid)
-
+        //是否直接打开相机
         takePhoto = intent.extras[C.EXTRA_TAKE_PHOTO] as Boolean
         if (takePhoto) {
             onCameraClick()
@@ -75,6 +78,10 @@ class ImageGridActivity : BaseActivity(), View.OnClickListener, ImageDataSource.
 
         initView()
         initPopWindow()
+        loadData()
+    }
+
+    private fun loadData() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
@@ -101,6 +108,35 @@ class ImageGridActivity : BaseActivity(), View.OnClickListener, ImageDataSource.
         recycler.addItemDecoration(GridSpacingItemDecoration(3, Utils.dp2px(this, 2f), false))
         adapter = ImageRecyclerAdapter(this, pickerHelper)
         adapter.listener = this
+        recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView?, newState: Int) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    if (tv_date.visibility == View.VISIBLE) {
+                        tv_date.animation = AnimationUtils.loadAnimation(this@ImageGridActivity, R.anim.fade_out)
+                        tv_date.visibility = View.GONE
+                    }
+                } else {
+                    if (tv_date.visibility == View.GONE) {
+                        tv_date.animation = AnimationUtils.loadAnimation(this@ImageGridActivity, R.anim.fade_in)
+                        tv_date.visibility = View.VISIBLE
+                    }
+                    val gridLayoutManager = recycler.layoutManager as GridLayoutManager
+                    val position = gridLayoutManager.findFirstCompletelyVisibleItemPosition()
+                    val addTime = adapter.getItem(position)?.addTime
+                    Log.d("hubert", "图片，position：$position ,addTime: $addTime")
+                    if (addTime != null) {
+                        val calendar = Calendar.getInstance()
+                        calendar.timeInMillis = addTime * 1000
+                        if (isSameDate(calendar.time, Calendar.getInstance().time)) {
+                            tv_date.text = "本周"
+                        } else {
+                            val format = SimpleDateFormat("yyyy/MM", Locale.getDefault())
+                            tv_date.text = format.format(calendar.time)
+                        }
+                    }
+                }
+            }
+        })
 
         if (pickerHelper.isMultiMode) {
             btn_ok.visibility = View.VISIBLE
@@ -260,15 +296,9 @@ class ImageGridActivity : BaseActivity(), View.OnClickListener, ImageDataSource.
 
     override fun onClick(v: View?) {
         when (v?.id) {
-            R.id.ll_dir -> {
-                showPopupFolderList()
-            }
-            R.id.btn_ok -> {
-                setResult()
-            }
-            R.id.btn_preview -> {
-                ImagePreviewActivity.startForResult(this, REQUEST_PREVIEW, 0, pickerHelper.selectedImages)
-            }
+            R.id.ll_dir -> showPopupFolderList()
+            R.id.btn_ok -> setResult()
+            R.id.btn_preview -> ImagePreviewActivity.startForResult(this, REQUEST_PREVIEW, 0, pickerHelper.selectedImages)
             R.id.btn_back -> {
                 setResult(Activity.RESULT_CANCELED)
                 finish()

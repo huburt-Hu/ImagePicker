@@ -4,10 +4,12 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.view.ViewPager
+import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import android.view.animation.AnimationUtils
 import com.huburt.library.C
 import com.huburt.library.R
+import com.huburt.library.adapter.SmallPreviewAdapter
 import com.huburt.library.bean.ImageItem
 import kotlinx.android.synthetic.main.activity_image_preview.*
 import kotlinx.android.synthetic.main.include_top_bar.*
@@ -22,6 +24,7 @@ class ImagePreviewActivity : ImagePreviewBaseActivity(), View.OnClickListener, P
 
     private lateinit var imageItems: ArrayList<ImageItem>
     private var current: Int = 0
+    private var previewAdapter: SmallPreviewAdapter = SmallPreviewAdapter(this, pickHelper.selectedImages)
 
     companion object {
 
@@ -52,6 +55,7 @@ class ImagePreviewActivity : ImagePreviewBaseActivity(), View.OnClickListener, P
                 val contains = pickHelper.selectedImages.contains(imageItem)
                 cb_check.isChecked = contains
                 tv_des.text = getString(R.string.ip_preview_image_count, position + 1, imageItems.size)
+                updatePreview()
             }
         })
 
@@ -72,10 +76,36 @@ class ImagePreviewActivity : ImagePreviewBaseActivity(), View.OnClickListener, P
                     showToast(getString(R.string.ip_select_limit, pickHelper.limit))
                     cb_check.isChecked = false
                 }
+                previewAdapter.notifyItemInserted(pickHelper.selectedImages.size - 1)
             } else {
+                val index = pickHelper.selectedImages.indexOf(imageItem)
                 pickHelper.selectedImages.remove(imageItem)
+                previewAdapter.notifyItemRemoved(index)
             }
             onCheckChanged(pickHelper.selectedImages.size, pickHelper.limit)
+            updatePreview()
+        }
+
+        rv_small.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        previewAdapter.listener = object : SmallPreviewAdapter.OnItemClickListener {
+            override fun onItemClick(position: Int, imageItem: ImageItem) {
+                viewpager.setCurrentItem(imageItems.indexOf(imageItem), false)
+            }
+        }
+        rv_small.adapter = previewAdapter
+        updatePreview()
+    }
+
+    private fun updatePreview() {
+        if (pickHelper.selectedImages.size > 0) {
+            rv_small.visibility = View.VISIBLE
+            val index = pickHelper.selectedImages.indexOf(imageItems[current])
+            previewAdapter.current = if (index >= 0) pickHelper.selectedImages[index] else null
+            if (index >= 0) {
+                rv_small.smoothScrollToPosition(index)
+            }
+        } else {
+            rv_small.visibility = View.GONE
         }
     }
 
