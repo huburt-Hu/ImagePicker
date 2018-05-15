@@ -10,10 +10,10 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 
-import com.huburt.library.ImagePicker;
-import com.huburt.library.bean.ImageItem;
-import com.huburt.library.util.Utils;
-import com.huburt.library.view.GridSpacingItemDecoration;
+import com.huburt.picker.ImagePicker;
+import com.huburt.picker.bean.ImageItem;
+import com.huburt.picker.util.Utils;
+import com.huburt.picker.view.GridSpacingItemDecoration;
 
 import org.jetbrains.annotations.NotNull;
 

@@ -9,8 +9,8 @@ import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.ImageView
 import com.bumptech.glide.Glide
-import com.huburt.library.bean.ImageItem
-import com.huburt.library.util.Utils
+import com.huburt.picker.bean.ImageItem
+import com.huburt.picker.util.Utils
 import java.io.File
 
 /**

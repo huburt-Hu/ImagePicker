@@ -1,7 +1,7 @@
 package com.huburt.imagepicker
 
 import android.app.Application
-import com.huburt.library.ImagePicker
+import com.huburt.picker.ImagePicker
 
 /**
  * Created by hubert
