@@ -1,4 +1,4 @@
-package com.huburt.picker
+package com.huburt.picker.util
 
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty

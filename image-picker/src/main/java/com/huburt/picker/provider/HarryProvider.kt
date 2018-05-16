@@ -1,4 +1,4 @@
-package com.huburt.picker
+package com.huburt.picker.provider
 
 import android.support.v4.content.FileProvider
 
@@ -10,4 +10,4 @@ import android.support.v4.content.FileProvider
  * Date: 2017-03-17  16:10
  */
 
-class ImagePickerProvider : FileProvider()
+class HarryProvider : FileProvider()

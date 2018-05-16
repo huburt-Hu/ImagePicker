@@ -27,8 +27,8 @@
             android:theme="@style/ImagePickerTheme" />
 
         <provider
-            android:name=".ImagePickerProvider"
-            android:authorities="${applicationId}.provider"
+            android:name=".provider.HarryProvider"
+            android:authorities="${applicationId}.harry.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

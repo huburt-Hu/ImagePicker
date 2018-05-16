@@ -12,16 +12,14 @@ import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.AdapterView
-import android.widget.Button
-import android.widget.TextView
 import com.huburt.picker.*
 import com.huburt.picker.adapter.ImageFolderAdapter
 import com.huburt.picker.adapter.ImageRecyclerAdapter
 import com.huburt.picker.bean.ImageFolder
 import com.huburt.picker.bean.ImageItem
+import com.huburt.picker.core.ImageDataSource
 import com.huburt.picker.util.CameraUtil
 import com.huburt.picker.util.Utils
 import com.huburt.picker.util.isSameDate

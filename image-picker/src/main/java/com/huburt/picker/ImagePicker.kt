@@ -1,16 +1,11 @@
 package com.huburt.picker
 
-import android.app.Activity
 import android.content.Context
-import android.support.v4.app.Fragment
-import com.huburt.picker.ImagePicker.pickHelper
 import com.huburt.picker.bean.ImageItem
 import com.huburt.picker.loader.ImageLoader
 import com.huburt.picker.ui.ShadowActivity
+import com.huburt.picker.util.InitializationCheck
 import com.huburt.picker.view.CropImageView
-import java.lang.ref.WeakReference
-import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KProperty
 
 /**
  * Created by hubert
@@ -139,29 +134,5 @@ object ImagePicker {
 
     interface OnPickImageResultListener {
         fun onImageResult(imageItems: ArrayList<ImageItem>)
-    }
-
-    private var mActivity: WeakReference<Activity>? = null
-    private var mFragment: WeakReference<Fragment>? = null
-
-    @JvmStatic
-    fun with(activity: Activity): OptionBuilder {
-        mActivity = WeakReference<Activity>(activity)
-        return OptionBuilder(this)
-    }
-
-    @JvmStatic
-    fun with(fragment: Fragment): OptionBuilder {
-        mFragment = WeakReference<Fragment>(fragment)
-        mActivity = WeakReference<Activity>(fragment.activity)
-        return OptionBuilder(this)
-    }
-
-    fun getActivity(): Activity? {
-        return mActivity?.get()
-    }
-
-    fun getFragment(): Fragment? {
-        return mFragment?.get()
     }
 }
