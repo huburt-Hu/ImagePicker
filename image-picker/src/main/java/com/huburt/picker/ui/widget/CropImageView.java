@@ -1,4 +1,4 @@
-package com.huburt.picker.view;
+package com.huburt.picker.ui.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;

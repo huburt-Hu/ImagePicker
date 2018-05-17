@@ -7,7 +7,7 @@
 
     <include layout="@layout/include_top_bar" />
 
-    <com.huburt.picker.view.CropImageView
+    <com.huburt.picker.ui.widget.CropImageView
         android:id="@+id/cv_crop_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

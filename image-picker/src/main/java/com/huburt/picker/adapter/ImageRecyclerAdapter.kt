@@ -2,32 +2,29 @@ package com.huburt.picker.adapter
 
 import android.app.Activity
 import android.support.v7.widget.AppCompatCheckBox
+import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.RecyclerView.ViewHolder
-import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AbsListView
 import android.widget.ImageView
 import android.widget.Toast
-import com.huburt.picker.ImagePicker
-import com.huburt.picker.PickHelper
 import com.huburt.picker.R
 import com.huburt.picker.bean.ImageItem
-import com.huburt.picker.util.Utils
+import com.huburt.picker.core.PickOption
+import com.huburt.picker.util.getScreenPix
 import java.util.*
 
 
-class ImageRecyclerAdapter(
+internal class ImageRecyclerAdapter(
         private val mActivity: Activity,
-        private val pickHelper: PickHelper,
+        private val mRecyclerView: RecyclerView,
         var images: ArrayList<ImageItem> = ArrayList()
 ) : RecyclerView.Adapter<ViewHolder>() {
 
-    private val mImageSize: Int = Utils.getImageItemWidth(mActivity)  //每个条目的大小
     private val mInflater: LayoutInflater = LayoutInflater.from(mActivity)
-    internal var listener: OnImageItemClickListener? = null   //图片被点击的监听
+    var listener: OnImageItemClickListener? = null   //图片被点击的监听
 
     interface OnImageItemClickListener {
         fun onImageItemClick(imageItem: ImageItem, position: Int)
@@ -47,57 +44,60 @@ class ImageRecyclerAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        (holder as? CameraViewHolder)?.bindCamera() ?: (holder as? ImageViewHolder)?.bind(position)
+        if (holder is CameraViewHolder) {
+            holder.bindCamera()
+        } else if (holder is ImageViewHolder) {
+            holder.bind(position)
+        }
     }
 
     override fun getItemViewType(position: Int): Int =
-            if (pickHelper.isShowCamera) if (position == 0) ITEM_TYPE_CAMERA else ITEM_TYPE_NORMAL
+            if (PickOption.capture)
+                if (position == 0) ITEM_TYPE_CAMERA else ITEM_TYPE_NORMAL
             else ITEM_TYPE_NORMAL
 
     override fun getItemId(position: Int): Long = position.toLong()
 
-    override fun getItemCount(): Int = if (pickHelper.isShowCamera) images.size + 1 else images.size
+    override fun getItemCount(): Int = if (PickOption.capture) images.size + 1 else images.size
 
     fun getItem(position: Int): ImageItem? =
-            if (pickHelper.isShowCamera)
+            if (PickOption.capture)
                 if (position == 0) null else images[position - 1]
             else images[position]
 
 
-    private inner class ImageViewHolder internal constructor(internal var rootView: View) : ViewHolder(rootView) {
+    private inner class ImageViewHolder constructor(rootView: View) : ViewHolder(rootView) {
 
-        internal var ivThumb: ImageView = rootView.findViewById(R.id.iv_thumb) as ImageView
-        internal var mask: View = rootView.findViewById(R.id.mask)
-        internal var checkView: View = rootView.findViewById(R.id.checkView)
-        internal var cbCheck: AppCompatCheckBox = rootView.findViewById(R.id.cb_check) as AppCompatCheckBox
-
-        init {
-            rootView.layoutParams = AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mImageSize) //让图片是个正方形
-        }
+        var ivThumb: ImageView = rootView.findViewById(R.id.iv_thumb) as ImageView
+        var mask: View = rootView.findViewById(R.id.mask)
+        var checkView: View = rootView.findViewById(R.id.checkView)
+        var cbCheck: AppCompatCheckBox = rootView.findViewById(R.id.cb_check) as AppCompatCheckBox
+        var ivGif: ImageView = rootView.findViewById(R.id.iv_gif) as ImageView
 
         internal fun bind(position: Int) {
             val imageItem = getItem(position)
-            ivThumb.setOnClickListener { listener?.onImageItemClick(imageItem!!, if (pickHelper.isShowCamera) position - 1 else position) }
+            ivThumb.setOnClickListener { listener?.onImageItemClick(imageItem!!, if (PickOption.capture) position - 1 else position) }
             checkView.setOnClickListener {
                 if (cbCheck.isChecked) {
-                    pickHelper.selectedImages.remove(imageItem)
+                    PickOption.selectedCollection.remove(imageItem)
                     mask.visibility = View.GONE
                     cbCheck.isChecked = false
                 } else {
-                    if (pickHelper.selectedImages.size >= pickHelper.limit) {
-                        Toast.makeText(mActivity.applicationContext, mActivity.getString(R.string.ip_select_limit, pickHelper.limit), Toast.LENGTH_SHORT).show()
+                    if (!PickOption.selectedCollection.canAdd(imageItem)) {
+                        Toast.makeText(mActivity.applicationContext,
+                                mActivity.getString(R.string.ip_select_limit, PickOption.limit), Toast.LENGTH_SHORT).show()
                     } else {
                         mask.visibility = View.VISIBLE
-                        pickHelper.selectedImages.add(imageItem!!)
+                        PickOption.selectedCollection.add(imageItem!!)
                         cbCheck.isChecked = true
                     }
                 }
-                listener?.onCheckChanged(pickHelper.selectedImages.size, pickHelper.limit)
+                listener?.onCheckChanged(PickOption.selectedCollection.size(), PickOption.limit)
             }
             //根据是否多选，显示或隐藏checkbox
-            if (pickHelper.isMultiMode) {
+            if (!PickOption.singleMode) {
                 cbCheck.visibility = View.VISIBLE
-                if (contains(pickHelper.selectedImages, imageItem)) {
+                if (PickOption.selectedCollection.contains(imageItem)) {
                     mask.visibility = View.VISIBLE
                     cbCheck.isChecked = true
                 } else {
@@ -108,27 +108,30 @@ class ImageRecyclerAdapter(
                 cbCheck.visibility = View.GONE
             }
             if (imageItem?.path != null) {
-                ImagePicker.imageLoader.displayImage(mActivity, imageItem.path!!, ivThumb, mImageSize, mImageSize) //显示图片
+                val resize = getResize()
+                if (imageItem.isGif()) {
+                    ivGif.visibility = View.VISIBLE
+                    PickOption.imageLoader.loadGifThumbnail(mActivity, imageItem.path!!, ivThumb, resize, resize) //显示图片
+                } else {
+                    ivGif.visibility = View.GONE
+                    PickOption.imageLoader.loadThumbnail(mActivity, imageItem.path!!, ivThumb, resize, resize) //显示图片
+                }
             }
         }
 
-        private fun contains(selectedImages: ArrayList<ImageItem>, imageItem: ImageItem?): Boolean {
-//            for (item in selectedImages) {
-//                if (TextUtils.equals(item.path, imageItem.path)) {
-//                    return true
-//                }
-//            }
-//            return false
-            //等同于上方
-            return selectedImages.any { TextUtils.equals(it.path, imageItem?.path) }
+        private fun getResize(): Int {
+            val displayMetrics = mActivity.getScreenPix()
+            val spanCount = (mRecyclerView.layoutManager as GridLayoutManager).spanCount
+            val availableWidth = displayMetrics.widthPixels -
+                    mActivity.resources.getDimensionPixelSize(R.dimen.media_grid_spacing) * (spanCount - 1)
+            val resize = availableWidth / spanCount
+            return resize
         }
     }
 
-    private inner class CameraViewHolder internal constructor(internal var mItemView: View) : ViewHolder(mItemView) {
+    private inner class CameraViewHolder constructor(var mItemView: View) : ViewHolder(mItemView) {
 
         internal fun bindCamera() {
-            mItemView.layoutParams = AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mImageSize) //让图片是个正方形
-            mItemView.tag = null
             mItemView.setOnClickListener {
                 listener?.onCameraClick()
             }
@@ -137,7 +140,7 @@ class ImageRecyclerAdapter(
 
     companion object {
 
-        private val ITEM_TYPE_CAMERA = 0  //第一个条目是相机
-        private val ITEM_TYPE_NORMAL = 1  //第一个条目不是相机
+        private const val ITEM_TYPE_CAMERA = 0  //第一个条目是相机
+        private const val ITEM_TYPE_NORMAL = 1  //第一个条目不是相机
     }
 }

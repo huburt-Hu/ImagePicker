@@ -4,9 +4,9 @@ import android.app.Activity
 import android.support.v4.view.PagerAdapter
 import android.view.View
 import android.view.ViewGroup
-import com.huburt.picker.ImagePicker
 import com.huburt.picker.bean.ImageItem
-import com.huburt.picker.util.Utils
+import com.huburt.picker.core.PickOption
+import com.huburt.picker.util.getScreenPix
 import uk.co.senab.photoview.PhotoView
 import uk.co.senab.photoview.PhotoViewAttacher
 import java.util.*
@@ -21,7 +21,7 @@ class ImagePageAdapter(
     var listener: PhotoViewAttacher.OnPhotoTapListener? = null
 
     init {
-        val dm = Utils.getScreenPix(mActivity)
+        val dm = mActivity.getScreenPix()
         screenWidth = dm.widthPixels
         screenHeight = dm.heightPixels
     }
@@ -34,7 +34,11 @@ class ImagePageAdapter(
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val photoView = PhotoView(mActivity)
         val imageItem = images[position]
-        ImagePicker.imageLoader?.displayImagePreview(mActivity, imageItem.path!!, photoView, screenWidth, screenHeight)
+        if (imageItem.isGif()) {
+            PickOption.imageLoader.loadGif(mActivity, imageItem.path!!, photoView, screenWidth, screenHeight)
+        } else {
+            PickOption.imageLoader.loadImage(mActivity, imageItem.path!!, photoView, screenWidth, screenHeight)
+        }
         photoView.setOnPhotoTapListener(listener)
         container.addView(photoView)
         return photoView

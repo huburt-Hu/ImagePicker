@@ -10,5 +10,9 @@
     <string name="ip_photo_crop">图片裁剪</string>
     <string name="ip_origin">原图</string>
     <string name="ip_origin_size">原图(%1$s)</string>
+    <string name="this_week">本周</string>
+    <string name="date_format">yyyy/MM</string>
+    <string name="permission_error">权限被禁止，无法选择本地图片</string>
+    <string name="permission_camera_error">权限被禁止，无法打开相机</string>
 
 </resources>

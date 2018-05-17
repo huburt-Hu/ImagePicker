@@ -11,6 +11,7 @@ import com.huburt.picker.C
 import com.huburt.picker.R
 import com.huburt.picker.adapter.SmallPreviewAdapter
 import com.huburt.picker.bean.ImageItem
+import com.huburt.picker.core.PickOption
 import kotlinx.android.synthetic.main.activity_image_preview.*
 import kotlinx.android.synthetic.main.include_top_bar.*
 import uk.co.senab.photoview.PhotoViewAttacher
@@ -24,7 +25,7 @@ class ImagePreviewActivity : ImagePreviewBaseActivity(), View.OnClickListener, P
 
     private lateinit var imageItems: ArrayList<ImageItem>
     private var current: Int = 0
-    private var previewAdapter: SmallPreviewAdapter = SmallPreviewAdapter(this, pickHelper.selectedImages)
+    private var previewAdapter: SmallPreviewAdapter = SmallPreviewAdapter(this)
 
     companion object {
 
@@ -38,8 +39,8 @@ class ImagePreviewActivity : ImagePreviewBaseActivity(), View.OnClickListener, P
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        imageItems = intent.extras[C.EXTRA_IMAGE_ITEMS] as ArrayList<ImageItem>
-        current = intent.extras[C.EXTRA_POSITION] as Int
+        imageItems = intent.getParcelableArrayListExtra(C.EXTRA_IMAGE_ITEMS)
+        current = intent.getIntExtra(C.EXTRA_POSITION, 0)
         init()
     }
 
@@ -52,7 +53,7 @@ class ImagePreviewActivity : ImagePreviewBaseActivity(), View.OnClickListener, P
             override fun onPageSelected(position: Int) {
                 current = position
                 val imageItem = imageItems[position]
-                val contains = pickHelper.selectedImages.contains(imageItem)
+                val contains = PickOption.selectedCollection.contains(imageItem)
                 cb_check.isChecked = contains
                 tv_des.text = getString(R.string.ip_preview_image_count, position + 1, imageItems.size)
                 updatePreview()
@@ -62,27 +63,27 @@ class ImagePreviewActivity : ImagePreviewBaseActivity(), View.OnClickListener, P
         imagePageAdapter.setData(imageItems)
         viewpager.currentItem = current
 
-        onCheckChanged(pickHelper.selectedImages.size, pickHelper.limit)
+        onCheckChanged(PickOption.selectedCollection.size(), PickOption.limit)
 
-        cb_check.isChecked = pickHelper.selectedImages.contains(imageItems[current])
+        cb_check.isChecked = PickOption.selectedCollection.contains(imageItems[current])
         cb_check.setOnClickListener {
             //checkBox 点击时会自动处理isCheck的状态转变，也就是说如果是选中状态，点击触发OnclickListener时，isCheck已经变成false了
             //cbCheck.isChecked = !cbCheck.isChecked
             val imageItem = imageItems[current]
             if (cb_check.isChecked) {
-                if (pickHelper.canSelect()) {
-                    pickHelper.selectedImages.add(imageItem)
+                if (PickOption.selectedCollection.canAdd(imageItem)) {
+                    PickOption.selectedCollection.add(imageItem)
                 } else {
-                    showToast(getString(R.string.ip_select_limit, pickHelper.limit))
+                    showToast(getString(R.string.ip_select_limit, PickOption.limit))
                     cb_check.isChecked = false
                 }
-                previewAdapter.notifyItemInserted(pickHelper.selectedImages.size - 1)
+                previewAdapter.notifyItemInserted(PickOption.selectedCollection.size() - 1)
             } else {
-                val index = pickHelper.selectedImages.indexOf(imageItem)
-                pickHelper.selectedImages.remove(imageItem)
+                val index = PickOption.selectedCollection.indexOf(imageItem)
+                PickOption.selectedCollection.remove(imageItem)
                 previewAdapter.notifyItemRemoved(index)
             }
-            onCheckChanged(pickHelper.selectedImages.size, pickHelper.limit)
+            onCheckChanged(PickOption.selectedCollection.size(), PickOption.limit)
             updatePreview()
         }
 
@@ -97,10 +98,10 @@ class ImagePreviewActivity : ImagePreviewBaseActivity(), View.OnClickListener, P
     }
 
     private fun updatePreview() {
-        if (pickHelper.selectedImages.size > 0) {
+        if (PickOption.selectedCollection.size() > 0) {
             rv_small.visibility = View.VISIBLE
-            val index = pickHelper.selectedImages.indexOf(imageItems[current])
-            previewAdapter.current = if (index >= 0) pickHelper.selectedImages[index] else null
+            val index = PickOption.selectedCollection.indexOf(imageItems[current])
+            previewAdapter.current = if (index >= 0) PickOption.selectedCollection[index] else null
             if (index >= 0) {
                 rv_small.smoothScrollToPosition(index)
             }

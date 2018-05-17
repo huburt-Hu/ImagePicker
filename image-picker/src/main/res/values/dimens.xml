@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="media_grid_spacing">2dp</dimen>
+    <dimen name="small_preview_width">50dp</dimen>
+    <dimen name="folder_image_width">78dp</dimen>
+</resources>

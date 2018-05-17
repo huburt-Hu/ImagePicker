@@ -1,5 +1,6 @@
 package com.huburt.picker.provider
 
+import android.content.Context
 import android.support.v4.content.FileProvider
 
 /**
@@ -10,4 +11,8 @@ import android.support.v4.content.FileProvider
  * Date: 2017-03-17  16:10
  */
 
-class HarryProvider : FileProvider()
+class HarryProvider : FileProvider() {
+    companion object {
+        fun getAuthorities(context: Context): String = context.packageName + ".harry.provider"
+    }
+}

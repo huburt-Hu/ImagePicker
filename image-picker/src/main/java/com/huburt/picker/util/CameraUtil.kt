@@ -9,6 +9,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.support.v4.content.FileProvider
 import android.util.Log
+import com.huburt.picker.provider.HarryProvider
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -41,14 +42,14 @@ object CameraUtil {
             } else {
                 // 7.0 调用系统相机拍照不再允许使用Uri方式，应该替换为FileProvider
                 // 并且这样可以解决MIUI系统上拍照返回size为0的情况
-                uri = FileProvider.getUriForFile(activity, ProviderUtil.getFileProviderName(activity), takeImageFile)
+                uri = FileProvider.getUriForFile(activity, HarryProvider.getAuthorities(activity), takeImageFile)
                 //加入uri权限 要不三星手机不能拍照
                 val resInfoList = activity.packageManager.queryIntentActivities(takePictureIntent, PackageManager.MATCH_DEFAULT_ONLY)
                 resInfoList
                         .map { it.activityInfo.packageName }
                         .forEach { activity.grantUriPermission(it, uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION) }
             }
-            Log.e("nanchen", ProviderUtil.getFileProviderName(activity))
+            Log.e("nanchen", HarryProvider.getAuthorities(activity))
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
         }
         activity.startActivityForResult(takePictureIntent, requestCode)

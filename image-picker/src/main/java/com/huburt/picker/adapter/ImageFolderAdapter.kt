@@ -8,16 +8,17 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import com.huburt.picker.ImagePicker
 import com.huburt.picker.R
 import com.huburt.picker.bean.ImageFolder
-import com.huburt.picker.util.Utils
-import java.util.*
+import com.huburt.picker.core.PickOption
 
-class ImageFolderAdapter(private val mActivity: Activity, folders: MutableList<ImageFolder>?) : BaseAdapter() {
-    private val mInflater: LayoutInflater
-    private val mImageSize: Int
-    private var imageFolders: MutableList<ImageFolder>? = null
+class ImageFolderAdapter(
+        private val mActivity: Activity,
+        private var imageFolders: MutableList<ImageFolder> = ArrayList()
+) : BaseAdapter() {
+    private val mInflater: LayoutInflater =
+            mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
     var selectIndex = 0
         set(i) {
             if (selectIndex != i) {
@@ -26,21 +27,15 @@ class ImageFolderAdapter(private val mActivity: Activity, folders: MutableList<I
             }
         }
 
-    init {
-        imageFolders = if (folders != null && folders.size > 0) folders else ArrayList()
-        mImageSize = Utils.getImageItemWidth(mActivity)
-        mInflater = mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-    }
-
     fun refreshData(folders: MutableList<ImageFolder>?) {
         if (folders != null && folders.size > 0) imageFolders = folders
-        else imageFolders?.clear()
+        else imageFolders.clear()
         notifyDataSetChanged()
     }
 
-    override fun getCount(): Int = imageFolders?.size ?: 0
+    override fun getCount(): Int = imageFolders.size
 
-    override fun getItem(position: Int): ImageFolder = imageFolders!![position]
+    override fun getItem(position: Int): ImageFolder = imageFolders[position]
 
     override fun getItemId(position: Int): Long = position.toLong()
 
@@ -57,8 +52,13 @@ class ImageFolderAdapter(private val mActivity: Activity, folders: MutableList<I
         val (name, _, cover, images) = getItem(position)
         holder.folderName.text = name
         holder.imageCount.text = mActivity.getString(R.string.ip_folder_image_count, images.size)
+        val imageSize = mActivity.resources.getDimensionPixelSize(R.dimen.folder_image_width)
         if (cover?.path != null) {
-            ImagePicker.imageLoader?.displayImage(mActivity, cover.path!!, holder.cover, mImageSize, mImageSize)
+            if (cover.isGif()) {
+                PickOption.imageLoader.loadGifThumbnail(mActivity, cover.path!!, holder.cover, imageSize, imageSize)
+            } else {
+                PickOption.imageLoader.loadThumbnail(mActivity, cover.path!!, holder.cover, imageSize, imageSize)
+            }
         }
 
         if (selectIndex == position) {

@@ -1,7 +1,7 @@
-package com.huburt.picker.core
+package com.huburt.picker.facade
 
 import android.content.Intent
-import com.huburt.picker.Harry
+import com.huburt.picker.core.PickOption
 import com.huburt.picker.ui.ImageGridActivity
 
 /**
@@ -12,6 +12,12 @@ class OptionBuilder {
 
     init {
         PickOption.reset()
+    }
+
+    fun singleMode(): OptionBuilder {
+        PickOption.singleMode = true
+        PickOption.limit = 1
+        return this
     }
 
     fun limit(int: Int): OptionBuilder {
@@ -34,7 +40,7 @@ class OptionBuilder {
         return this
     }
 
-    fun pick(requestCode: Int) {
+    fun forResult(requestCode: Int) {
         val activity = Harry.getActivity() ?: return
         val intent = Intent(activity, ImageGridActivity::class.java)
         val fragment = Harry.getFragment()
@@ -43,5 +49,10 @@ class OptionBuilder {
         } else {
             fragment.startActivityForResult(intent, requestCode)
         }
+    }
+
+    fun openCamera(requestCode: Int) {
+        PickOption.openCamera = true
+        forResult(requestCode)
     }
 }

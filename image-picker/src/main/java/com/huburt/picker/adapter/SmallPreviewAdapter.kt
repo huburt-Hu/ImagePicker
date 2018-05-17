@@ -7,10 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import com.huburt.picker.ImagePicker
 import com.huburt.picker.R
 import com.huburt.picker.bean.ImageItem
-import java.util.*
+import com.huburt.picker.core.PickOption
 
 /**
  * Created by hubert
@@ -19,7 +18,7 @@ import java.util.*
  */
 class SmallPreviewAdapter(
         private val mActivity: Activity,
-        var images: List<ImageItem> = ArrayList()
+        var images: List<ImageItem> = PickOption.selectedCollection.getList()
 ) : RecyclerView.Adapter<SmallPreviewAdapter.SmallPreviewViewHolder>() {
 
     var current: ImageItem? = null
@@ -48,16 +47,21 @@ class SmallPreviewAdapter(
         val v_frame = mView.findViewById(R.id.v_frame)
 
         fun bind(position: Int) {
+            val imageItem = images[position]
             mView.setOnClickListener {
-                listener?.onItemClick(position, images[position])
+                listener?.onItemClick(position, imageItem)
             }
-            if (TextUtils.equals(current?.path, images[position].path)) {
+            if (TextUtils.equals(current?.path, imageItem.path)) {
                 v_frame.visibility = View.VISIBLE
             } else {
                 v_frame.visibility = View.GONE
             }
-            ImagePicker.imageLoader.displayImage(mActivity, images[position].path!!, iv_small, iv_small.width, iv_small.height)
-
+            val resize = mActivity.resources.getDimensionPixelSize(R.dimen.small_preview_width)
+            if (imageItem.isGif()) {
+                PickOption.imageLoader.loadGifThumbnail(mActivity, imageItem.path!!, iv_small, resize, resize)
+            } else {
+                PickOption.imageLoader.loadThumbnail(mActivity, imageItem.path!!, iv_small, resize, resize)
+            }
         }
     }
 

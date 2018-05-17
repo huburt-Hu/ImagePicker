@@ -1,7 +1,7 @@
 package com.huburt.imagepicker
 
 import android.app.Application
-import com.huburt.picker.ImagePicker
+import com.huburt.picker.facade.Harry
 
 /**
  * Created by hubert
@@ -12,8 +12,6 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        ImagePicker.init(GlideImageLoader())
-        //保存为自定义默认
-        ImagePicker.limit(12).isCrop(true).saveAsDefault()
+        Harry.initImageLoader(GlideImageLoader())
     }
 }

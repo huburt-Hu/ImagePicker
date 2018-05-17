@@ -14,17 +14,18 @@ import android.view.Gravity
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.AdapterView
-import com.huburt.picker.*
+import com.huburt.picker.C
+import com.huburt.picker.R
 import com.huburt.picker.adapter.ImageFolderAdapter
 import com.huburt.picker.adapter.ImageRecyclerAdapter
 import com.huburt.picker.bean.ImageFolder
 import com.huburt.picker.bean.ImageItem
 import com.huburt.picker.core.ImageDataSource
+import com.huburt.picker.core.PickOption
+import com.huburt.picker.ui.widget.FolderPopUpWindow
+import com.huburt.picker.ui.widget.GridSpacingItemDecoration
 import com.huburt.picker.util.CameraUtil
-import com.huburt.picker.util.Utils
-import com.huburt.picker.util.isSameDate
-import com.huburt.picker.view.FolderPopUpWindow
-import com.huburt.picker.view.GridSpacingItemDecoration
+import com.huburt.picker.util.inSameWeek
 import kotlinx.android.synthetic.main.activity_image_grid.*
 import kotlinx.android.synthetic.main.include_top_bar.*
 import java.io.File
@@ -38,25 +39,14 @@ import java.util.*
  */
 class ImageGridActivity : BaseActivity(), View.OnClickListener, ImageDataSource.OnImagesLoadedListener, ImageRecyclerAdapter.OnImageItemClickListener {
     companion object {
-
-        val REQUEST_PERMISSION_STORAGE = 0x12
-        val REQUEST_PERMISSION_CAMERA = 0x13
-        val REQUEST_CAMERA = 0x23
-        val REQUEST_PREVIEW = 0x9
-        val REQUEST_CROP = 0x10
-        val INTENT_MAX = 1000
-
-        /**
-         * @param takePhoto 是否直接开启拍照
-         */
-        fun startForResult(activity: Activity, requestCode: Int, takePhoto: Boolean) {
-            val intent = Intent(activity, ImageGridActivity::class.java)
-            intent.putExtra(C.EXTRA_TAKE_PHOTO, takePhoto)
-            activity.startActivityForResult(intent, requestCode)
-        }
+        const val REQUEST_PERMISSION_STORAGE = 0x12
+        const val REQUEST_PERMISSION_CAMERA = 0x13
+        const val REQUEST_CAMERA = 0x23
+        const val REQUEST_PREVIEW = 0x9
+        const val REQUEST_CROP = 0x10
+        const val INTENT_MAX = 1000
     }
 
-    private val pickerHelper: PickHelper = ImagePicker.pickHelper
     private val imageDataSource = ImageDataSource(this)
     private lateinit var adapter: ImageRecyclerAdapter
     private lateinit var mFolderPopupWindow: FolderPopUpWindow
@@ -69,8 +59,7 @@ class ImageGridActivity : BaseActivity(), View.OnClickListener, ImageDataSource.
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_image_grid)
         //是否直接打开相机
-        takePhoto = intent.extras[C.EXTRA_TAKE_PHOTO] as Boolean
-        if (takePhoto) {
+        if (PickOption.openCamera) {
             onCameraClick()
         }
 
@@ -93,7 +82,7 @@ class ImageGridActivity : BaseActivity(), View.OnClickListener, ImageDataSource.
         super.onResume()
         //数据刷新
         adapter.notifyDataSetChanged()
-        onCheckChanged(pickerHelper.selectedImages.size, pickerHelper.limit)
+        onCheckChanged(PickOption.selectedCollection.size(), PickOption.limit)
     }
 
     private fun initView() {
@@ -103,8 +92,9 @@ class ImageGridActivity : BaseActivity(), View.OnClickListener, ImageDataSource.
         btn_preview.setOnClickListener(this)
 
         recycler.layoutManager = GridLayoutManager(this, 3)
-        recycler.addItemDecoration(GridSpacingItemDecoration(3, Utils.dp2px(this, 2f), false))
-        adapter = ImageRecyclerAdapter(this, pickerHelper)
+        recycler.addItemDecoration(GridSpacingItemDecoration(3,
+                resources.getDimensionPixelSize(R.dimen.media_grid_spacing), false))
+        adapter = ImageRecyclerAdapter(this, recycler)
         adapter.listener = this
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView?, newState: Int) {
@@ -121,14 +111,13 @@ class ImageGridActivity : BaseActivity(), View.OnClickListener, ImageDataSource.
                     val gridLayoutManager = recycler.layoutManager as GridLayoutManager
                     val position = gridLayoutManager.findFirstCompletelyVisibleItemPosition()
                     val addTime = adapter.getItem(position)?.addTime
-                    Log.d("hubert", "图片，position：$position ,addTime: $addTime")
                     if (addTime != null) {
                         val calendar = Calendar.getInstance()
                         calendar.timeInMillis = addTime * 1000
-                        if (isSameDate(calendar.time, Calendar.getInstance().time)) {
-                            tv_date.text = "本周"
+                        if (calendar.time.inSameWeek(Calendar.getInstance().time)) {
+                            tv_date.text = getString(R.string.this_week)
                         } else {
-                            val format = SimpleDateFormat("yyyy/MM", Locale.getDefault())
+                            val format = SimpleDateFormat(getString(R.string.date_format), Locale.getDefault())
                             tv_date.text = format.format(calendar.time)
                         }
                     }
@@ -136,7 +125,7 @@ class ImageGridActivity : BaseActivity(), View.OnClickListener, ImageDataSource.
             }
         })
 
-        if (pickerHelper.isMultiMode) {
+        if (!PickOption.singleMode) {
             btn_ok.visibility = View.VISIBLE
             btn_preview.visibility = View.VISIBLE
         } else {
@@ -146,7 +135,7 @@ class ImageGridActivity : BaseActivity(), View.OnClickListener, ImageDataSource.
     }
 
     private fun initPopWindow() {
-        mImageFolderAdapter = ImageFolderAdapter(this, null)
+        mImageFolderAdapter = ImageFolderAdapter(this)
         mFolderPopupWindow = FolderPopUpWindow(this, mImageFolderAdapter)
         mFolderPopupWindow.setOnItemClickListener(object : FolderPopUpWindow.OnItemClickListener {
             override fun onItemClick(adapterView: AdapterView<*>, view: View, position: Int, l: Long) {
@@ -174,7 +163,7 @@ class ImageGridActivity : BaseActivity(), View.OnClickListener, ImageDataSource.
     }
 
     override fun onImageItemClick(imageItem: ImageItem, position: Int) {
-        if (pickerHelper.isMultiMode) {
+        if (!PickOption.singleMode) {
             var images = adapter.images
             var p = position
             if (images.size > INTENT_MAX) {//数据量过大
@@ -198,9 +187,9 @@ class ImageGridActivity : BaseActivity(), View.OnClickListener, ImageDataSource.
             }
             ImagePreviewActivity.startForResult(this, REQUEST_PREVIEW, p, images)
         } else {
-            pickerHelper.selectedImages.clear()
-            pickerHelper.selectedImages.add(imageItem)
-            if (pickerHelper.isCrop) {//需要裁剪
+            PickOption.selectedCollection.clear()
+            PickOption.selectedCollection.add(imageItem)
+            if (PickOption.crop) {//需要裁剪
                 ImageCropActivity.start(this, REQUEST_CROP)
             } else {
                 setResult()
@@ -241,13 +230,13 @@ class ImageGridActivity : BaseActivity(), View.OnClickListener, ImageDataSource.
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 imageDataSource.loadImage(this)
             } else {
-                showToast("权限被禁止，无法选择本地图片")
+                showToast(getString(R.string.permission_error))
             }
         } else if (requestCode == REQUEST_PERMISSION_CAMERA) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 takeImageFile = CameraUtil.takePicture(this, REQUEST_CAMERA)
             } else {
-                showToast("权限被禁止，无法打开相机")
+                showToast(getString(R.string.permission_camera_error))
             }
         }
     }
@@ -263,10 +252,10 @@ class ImageGridActivity : BaseActivity(), View.OnClickListener, ImageDataSource.
                 sendBroadcast(mediaScanIntent)
 
                 val imageItem = ImageItem(takeImageFile.absolutePath)
-                pickerHelper.selectedImages.clear()
-                pickerHelper.selectedImages.add(imageItem)
+                PickOption.selectedCollection.clear()
+                PickOption.selectedCollection.add(imageItem)
 
-                if (pickerHelper.isCrop) {//需要裁剪
+                if (PickOption.crop) {//需要裁剪
                     ImageCropActivity.start(this, REQUEST_CROP)
                 } else {
                     setResult()
@@ -287,7 +276,7 @@ class ImageGridActivity : BaseActivity(), View.OnClickListener, ImageDataSource.
 
     private fun setResult() {
         val result = Intent()
-        result.putExtra(C.EXTRA_IMAGE_ITEMS, pickerHelper.selectedImages)
+        result.putExtra(C.EXTRA_IMAGE_ITEMS, PickOption.selectedCollection.getList())
         setResult(Activity.RESULT_OK, result)
         finish()
     }
@@ -296,7 +285,8 @@ class ImageGridActivity : BaseActivity(), View.OnClickListener, ImageDataSource.
         when (v?.id) {
             R.id.ll_dir -> showPopupFolderList()
             R.id.btn_ok -> setResult()
-            R.id.btn_preview -> ImagePreviewActivity.startForResult(this, REQUEST_PREVIEW, 0, pickerHelper.selectedImages)
+            R.id.btn_preview -> ImagePreviewActivity.startForResult(this, REQUEST_PREVIEW,
+                    0, PickOption.selectedCollection.getList())
             R.id.btn_back -> {
                 setResult(Activity.RESULT_CANCELED)
                 finish()

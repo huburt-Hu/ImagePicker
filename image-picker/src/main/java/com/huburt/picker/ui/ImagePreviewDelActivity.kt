@@ -8,6 +8,7 @@ import android.view.View
 import android.view.animation.AnimationUtils
 import com.huburt.picker.C
 import com.huburt.picker.R
+import com.huburt.picker.core.PickOption
 import kotlinx.android.synthetic.main.activity_image_preview.*
 import kotlinx.android.synthetic.main.include_top_bar.*
 
@@ -42,7 +43,7 @@ class ImagePreviewDelActivity : ImagePreviewBaseActivity() {
         btn_del.visibility = View.VISIBLE
 
         updateTitle()
-        imagePageAdapter.setData(pickHelper.selectedImages)
+        imagePageAdapter.setData(PickOption.selectedCollection.getList())
         viewpager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
                 current = position
@@ -52,12 +53,12 @@ class ImagePreviewDelActivity : ImagePreviewBaseActivity() {
         viewpager.currentItem = current
 
         btn_del.setOnClickListener({
-            pickHelper.selectedImages.removeAt(current)
+            PickOption.selectedCollection.removeAt(current)
             if (current != 0) current -= 1
             imagePageAdapter.notifyDataSetChanged()
             viewpager.currentItem = current
             updateTitle()
-            if (pickHelper.selectedImages.size == 0) {
+            if (PickOption.selectedCollection.size() == 0) {
                 setResult()
             }
         })
@@ -65,15 +66,15 @@ class ImagePreviewDelActivity : ImagePreviewBaseActivity() {
 
     private fun setResult() {
         val data = Intent()
-        data.putExtra(C.EXTRA_IMAGE_ITEMS, pickHelper.selectedImages)
+        data.putExtra(C.EXTRA_IMAGE_ITEMS, PickOption.selectedCollection.getList())
         setResult(Activity.RESULT_OK, data)
         finish()
     }
 
     private fun updateTitle() {
         tv_des.text = getString(R.string.ip_preview_image_count,
-                if (pickHelper.selectedImages.size > 0) current + 1 else current,
-                pickHelper.selectedImages.size)
+                if (PickOption.selectedCollection.size() > 0) current + 1 else current,
+                PickOption.selectedCollection.size())
     }
 
     override fun onPhotoTap(view: View?, x: Float, y: Float) {

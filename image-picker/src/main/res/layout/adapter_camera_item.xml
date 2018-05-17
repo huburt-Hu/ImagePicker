@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<com.huburt.picker.ui.widget.SquareFrameLayout
     android:id="@+id/camera"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -18,4 +18,4 @@
         android:textColor="#CDCECE"
         android:textSize="14sp"/>
 
-</RelativeLayout>
+</com.huburt.picker.ui.widget.SquareFrameLayout>

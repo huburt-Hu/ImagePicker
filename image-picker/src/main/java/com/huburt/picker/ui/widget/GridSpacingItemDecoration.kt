@@ -1,4 +1,4 @@
-package com.huburt.picker.view
+package com.huburt.picker.ui.widget
 
 import android.graphics.Rect
 import android.support.v7.widget.RecyclerView

@@ -1,20 +1,8 @@
 package com.huburt.picker.ui
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
-import android.support.v4.view.ViewPager
-import android.support.v7.widget.AppCompatCheckBox
-import android.view.View
-import android.view.animation.AnimationUtils
-import android.widget.Button
-import android.widget.TextView
-import com.huburt.picker.C
-import com.huburt.picker.ImagePicker
-import com.huburt.picker.PickHelper
 import com.huburt.picker.R
 import com.huburt.picker.adapter.ImagePageAdapter
-import com.huburt.picker.bean.ImageItem
 import kotlinx.android.synthetic.main.activity_image_preview.*
 import kotlinx.android.synthetic.main.include_top_bar.*
 import uk.co.senab.photoview.PhotoViewAttacher
@@ -28,8 +16,6 @@ abstract class ImagePreviewBaseActivity : BaseActivity(), PhotoViewAttacher.OnPh
 
 
     protected lateinit var imagePageAdapter: ImagePageAdapter
-    protected var pickHelper: PickHelper = ImagePicker.pickHelper
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

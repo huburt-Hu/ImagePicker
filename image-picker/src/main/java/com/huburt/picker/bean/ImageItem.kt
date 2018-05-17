@@ -40,6 +40,10 @@ data class ImageItem(
         return path?.hashCode() ?: 0
     }
 
+    fun isGif(): Boolean {
+        return if (mimeType == null) false else mimeType == MimeType.GIF.toString()
+    }
+
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(path)
         parcel.writeString(name)

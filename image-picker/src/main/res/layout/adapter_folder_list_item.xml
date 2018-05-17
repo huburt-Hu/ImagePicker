@@ -15,8 +15,8 @@
 
         <ImageView
             android:id="@+id/iv_cover"
-            android:layout_width="78dp"
-            android:layout_height="78dp"
+            android:layout_width="@dimen/folder_image_width"
+            android:layout_height="@dimen/folder_image_width"
             android:layout_marginBottom="6dp"
             android:layout_marginRight="6dp"
             android:scaleType="centerCrop"
