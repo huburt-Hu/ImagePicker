@@ -15,7 +15,7 @@ import java.io.File
  * Created on 2017/10/12.
  */
 class GlideImageLoader : ImageLoader {
-    override fun loadThumbnail(activity: Activity, path: String, imageView: ImageView, width: Int, height: Int) {
+    override fun loadThumbnail(activity: Activity, path: String?, imageView: ImageView, width: Int, height: Int) {
         Glide.with(activity)                             //配置上下文
                 .load(Uri.fromFile(File(path))) //设置图片路径(fix #8,文件名包含%符号 无法识别和显示)
                 .asBitmap()
@@ -26,7 +26,7 @@ class GlideImageLoader : ImageLoader {
                 .into(imageView)
     }
 
-    override fun loadGifThumbnail(activity: Activity, path: String, imageView: ImageView, width: Int, height: Int) {
+    override fun loadGifThumbnail(activity: Activity, path: String?, imageView: ImageView, width: Int, height: Int) {
         Glide.with(activity)                             //配置上下文
                 .load(Uri.fromFile(File(path)))      //设置图片路径(fix #8,文件名包含%符号 无法识别和显示)
                 .asBitmap()
@@ -35,7 +35,7 @@ class GlideImageLoader : ImageLoader {
                 .into(imageView)
     }
 
-    override fun loadImage(activity: Activity, path: String, imageView: ImageView, width: Int, height: Int) {
+    override fun loadImage(activity: Activity, path: String?, imageView: ImageView, width: Int, height: Int) {
         Glide.with(activity)                             //配置上下文
                 .load(Uri.fromFile(File(path)))      //设置图片路径(fix #8,文件名包含%符号 无法识别和显示)
                 .override(width, height)
@@ -44,7 +44,7 @@ class GlideImageLoader : ImageLoader {
                 .into(imageView)
     }
 
-    override fun loadGif(activity: Activity, path: String, imageView: ImageView, width: Int, height: Int) {
+    override fun loadGif(activity: Activity, path: String?, imageView: ImageView, width: Int, height: Int) {
         Glide.with(activity)                             //配置上下文
                 .load(Uri.fromFile(File(path)))      //设置图片路径(fix #8,文件名包含%符号 无法识别和显示)
                 .into(imageView)
